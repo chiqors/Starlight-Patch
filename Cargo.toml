@@ -1,0 +1,38 @@
+[package]
+name = "starlight-patch"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ansi_term = "0.12.1"
+colored = "3.1.1"
+ilhook = "2.3.0"
+lazy_static = "1.5.0"
+reqwest = { version = "0.13.4", features = ["blocking"] }
+rsa = "0.10.0-rc.18"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"
+toml = "1.1.2"
+tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
+
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_Networking_WinHttp",
+    "Win32_System",
+    "Win32_System_Console",
+    "Win32_System_Diagnostics_Debug",
+    "Win32_System_Environment",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Memory",
+    "Win32_System_ProcessStatus",
+    "Win32_System_SystemInformation",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_UI_Shell",
+] }
+memchr = "2.8.2"
+memmem = "0.1.1"
+
+[lib]
+crate-type = ["cdylib"]
