@@ -58,9 +58,8 @@ pub fn load_config() {
 
         if let Ok(deserialized) = deserialized {
             config.encryption = deserialized;
+            FROM_REMOTE.store(true, Ordering::Relaxed);
         }
-        
-        FROM_REMOTE.store(true, Ordering::Relaxed);
     }
 
     CONFIG.set(RwLock::new(config)).unwrap();
