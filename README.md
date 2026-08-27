@@ -15,4 +15,4 @@ An utility to patch certain features of *a certain anime game*, used to connect 
 
 ## Compatibility & settings
 This patch creates a default settings file at the game root folder called `config.toml`. There, you can change the redirection target, as well as the keys. The patch also requests a remote configuration from Starlight powered servers, for security and easy access.
-Additionally, you can apply overrides with the `--ps-addr` and `--ps-port` CLI arguments.
+Additionally, you can apply overrides with the `--ps-addr` and `--ps-port` CLI arguments. On the latest updates, a new in-game UI has been included. Toggle it using **Ctrl + L**.
