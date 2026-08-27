@@ -18,7 +18,7 @@ const KEY_SIZE: usize = 268;
 lazy_static! {
     pub static ref PUBLIC_KEY: Vec<u8> = {
         let key = RsaPublicKey::from_public_key_pem(
-            CONFIG.get().unwrap().encryption.check_sign_key.as_str(),
+            CONFIG.get().unwrap().read().unwrap().encryption.check_sign_key.as_str(),
         )
         .unwrap();
 
@@ -64,8 +64,12 @@ unsafe extern "win64" fn on_perform_action(reg: *mut Registers, _: usize) {
 }
 
 unsafe extern "win64" fn on_sdk_rsa_encrypt(reg: *mut Registers, _: usize) {
-    (*reg).rcx =
-        misc::create_il2cpp_string(&*CONFIG.get().unwrap().encryption.sdk_key) as u64;
+    let config = CONFIG.get().unwrap().read().unwrap();
+
+    if config.encryption.use_sdk_rsa {
+        (*reg).rcx =
+            misc::create_il2cpp_string(&config.encryption.sdk_key) as u64;
+    }
 }
 
 unsafe extern "win64" fn after_key_sign_check(reg: *mut Registers, _: usize) {

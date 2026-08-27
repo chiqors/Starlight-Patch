@@ -23,7 +23,7 @@ impl Fireable for Patch<HYPass> {
 }
 
 unsafe extern "win64" fn on_connect(reg: *mut Registers, _: usize) {
-    let config = CONFIG.get().unwrap();
+    let config = CONFIG.get().unwrap().read().unwrap();
 
     let host = HOST.get_or_init(|| {
         config.network.address

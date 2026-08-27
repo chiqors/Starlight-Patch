@@ -1,4 +1,3 @@
-#![feature(str_from_utf16_endian)]
 #![allow(unsafe_op_in_unsafe_fn)]
 
 mod misc;
@@ -7,9 +6,11 @@ mod hookmgr;
 mod config;
 mod protection;
 mod scanner;
+mod ui;
 
 use std::ffi::c_void;
 use std::sync::RwLock;
+use hudhook::hooks::dx11::ImguiDx11Hooks;
 use lazy_static::lazy_static;
 use windows::Win32::Foundation::HINSTANCE;
 use windows::Win32::System::Console::AllocConsole;
@@ -55,8 +56,23 @@ unsafe fn main() {
 
 #[allow(non_snake_case)]
 #[unsafe(no_mangle)]
-unsafe extern "C" fn DllMain(_: HINSTANCE, reason: u32, _: *mut c_void) {
+unsafe extern "C" fn DllMain(
+    hmodule: HINSTANCE,
+    reason: u32,
+    _: *mut c_void,
+) {
     if reason == DLL_PROCESS_ATTACH {
+        let hmodule = hmodule.0 as usize;
+
         std::thread::spawn(move || main());
+        std::thread::spawn(move || {
+            let hmodule = HINSTANCE(hmodule as _);
+            hudhook::Hudhook::builder()
+                .with::<ImguiDx11Hooks>(ui::RenderLoop { ui_visible: true, toggle_pressed: false })
+                .with_hmodule(hmodule)
+                .build()
+                .apply()
+                .unwrap();
+        });
     }
 }

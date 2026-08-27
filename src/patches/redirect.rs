@@ -35,7 +35,7 @@ unsafe extern "win64" fn on_make_initial_url(reg: *mut Registers, _: usize) {
     let slice = std::slice::from_raw_parts(str_ptr, (str_length * 2) as usize);
     let old_url = String::from_utf16le(slice).unwrap();
 
-    let config = CONFIG.get().unwrap();
+    let config = CONFIG.get().unwrap().read().unwrap();
     let use_https = config.network.https;
     let mut url = format!(
         "http{}://{}:{}",
@@ -62,7 +62,7 @@ unsafe extern "win64" fn on_browser_load_url(reg: *mut Registers, _: usize) {
     let slice = std::slice::from_raw_parts(str_ptr, (str_length * 2) as usize);
     let old_url = String::from_utf16le(slice).unwrap();
 
-    let config = CONFIG.get().unwrap();
+    let config = CONFIG.get().unwrap().read().unwrap();
     let use_https = config.network.https;
     let mut new_url = format!(
         "http{}://{}:{}",

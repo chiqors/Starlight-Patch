@@ -1,7 +1,9 @@
 use std::fs::File;
 use std::io::{Read, Write};
 use std::str::FromStr;
-use crate::config::{get_remote_key_config, Config, EncryptionConfig, CONFIG};
+use std::sync::atomic::Ordering;
+use std::sync::RwLock;
+use crate::config::{get_remote_key_config, Config, EncryptionConfig, CONFIG, FROM_REMOTE};
 use crate::misc::exe_dir;
 
 pub fn load_config() {
@@ -57,7 +59,9 @@ pub fn load_config() {
         if let Ok(deserialized) = deserialized {
             config.encryption = deserialized;
         }
+        
+        FROM_REMOTE.store(true, Ordering::Relaxed);
     }
 
-    CONFIG.set(config).unwrap();
+    CONFIG.set(RwLock::new(config)).unwrap();
 }
