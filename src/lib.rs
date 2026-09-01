@@ -33,6 +33,8 @@ lazy_static! {
 }
 
 unsafe fn main() {
+    std::thread::sleep(std::time::Duration::from_secs(2));
+
     unsafe { AllocConsole().unwrap() };
 
     tracing_subscriber::fmt()
@@ -66,6 +68,7 @@ unsafe extern "C" fn DllMain(
 
         std::thread::spawn(move || main());
         std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_secs(2));
             let hmodule = HINSTANCE(hmodule as _);
             hudhook::Hudhook::builder()
                 .with::<ImguiDx11Hooks>(ui::RenderLoop { ui_visible: true, toggle_pressed: false })

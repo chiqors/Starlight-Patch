@@ -59,8 +59,25 @@ pub fn load_config() {
         if let Ok(deserialized) = deserialized {
             config.encryption = deserialized;
             FROM_REMOTE.store(true, Ordering::Relaxed);
+        } else {
+            FROM_REMOTE.store(false, Ordering::Relaxed);
         }
+    } else {
+        FROM_REMOTE.store(false, Ordering::Relaxed);
     }
 
-    CONFIG.set(RwLock::new(config)).unwrap();
+    match CONFIG.get() {
+        Some(lock) => {
+            let mut current = lock
+                .write()
+                .expect("Config lock is broken");
+
+            *current = config;
+        }
+        None => {
+            CONFIG
+                .set(RwLock::new(config))
+                .expect("couldn't initialize config");
+        }
+    }
 }
