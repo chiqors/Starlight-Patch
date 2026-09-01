@@ -12,12 +12,22 @@ pub static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
 pub static FROM_REMOTE: AtomicBool = AtomicBool::new(false);
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     pub network: NetworkConfig,
-    pub encryption: EncryptionConfig
+    pub encryption: EncryptionConfig,
+    pub fps: FpsConfig,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
+pub struct FpsConfig {
+    pub target_max_fps: i32,
+    pub enabled: bool
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct NetworkConfig {
     pub address: String,
     pub port: i32,
@@ -26,6 +36,7 @@ pub struct NetworkConfig {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde(default)]
 pub struct EncryptionConfig {
     pub sdk_key: String,
     pub check_sign_key: String,
@@ -35,16 +46,38 @@ pub struct EncryptionConfig {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            network: NetworkConfig {
-                address: "localhost".to_string(),
-                port: 8080,
-                https: false,
-            },
-            encryption: EncryptionConfig {
-                sdk_key: include_str!("../../default_sdk_key.xml").to_string(),
-                check_sign_key: include_str!("../../default_check_sign_key.pem").to_string(),
-                use_sdk_rsa: true
-            }
+            network: NetworkConfig::default(),
+            encryption: EncryptionConfig::default(),
+            fps: FpsConfig::default(),
+        }
+    }
+}
+
+impl Default for NetworkConfig {
+    fn default() -> Self {
+        Self {
+            address: "localhost".to_string(),
+            port: 8080,
+            https: false,
+        }
+    }
+}
+
+impl Default for EncryptionConfig {
+    fn default() -> Self {
+        Self {
+            sdk_key: include_str!("../../default_sdk_key.xml").to_string(),
+            check_sign_key: include_str!("../../default_check_sign_key.pem").to_string(),
+            use_sdk_rsa: true,
+        }
+    }
+}
+
+impl Default for FpsConfig {
+    fn default() -> Self {
+        Self {
+            target_max_fps: 60,
+            enabled: false,
         }
     }
 }

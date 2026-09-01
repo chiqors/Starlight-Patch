@@ -6,6 +6,8 @@ use hudhook::imgui::{Context, Ui};
 use hudhook::{imgui, ImguiRenderLoop, RenderContext};
 use crate::config::{save_config, CONFIG, FROM_REMOTE};
 use windows::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_L};
+use crate::patches::fps;
+use crate::patches::fps::update_frame_rate;
 
 pub struct RenderLoop {
     pub ui_visible: bool,
@@ -88,6 +90,10 @@ impl ImguiRenderLoop for RenderLoop {
                             ui.text_colored(rgba(255, 204, 128, 255), "Loading settings...");
                         }
 
+                        // (should, reset)
+                        let mut should_update_fps = false;
+                        let mut should_reset = false;
+
                         if let Ok(mut config) = CONFIG.get().unwrap().write() {
                             if ui.collapsing_header("Encryption", imgui::TreeNodeFlags::empty()) {
                                 if FROM_REMOTE.load(Ordering::Relaxed) {
@@ -130,11 +136,68 @@ impl ImguiRenderLoop for RenderLoop {
                                 ui.input_text("Host", &mut config.network.address).build();
                                 ui.input_int("Port", &mut config.network.port).build();
                             }
+
+                            if ui.collapsing_header("FPS", imgui::TreeNodeFlags::empty()) {
+                                if fps::WORKS.load(Ordering::Relaxed) {
+                                    {
+                                        let bold = fonts.get(1).unwrap();
+                                        let _font = ui.push_font(*bold);
+                                        ui.text("FPS unlocker");
+                                    }
+
+                                    let mut value = match config.fps.target_max_fps {
+                                        -1 => 0,
+                                        _ => config.fps.target_max_fps,
+                                    };
+
+                                    if ui.checkbox("Enabled", &mut config.fps.enabled) {
+                                        should_update_fps = true;
+                                        should_reset = !config.fps.enabled;
+                                    }
+
+                                    let submitted = ui
+                                        .input_int("Target frame rate", &mut value)
+                                        .enter_returns_true(true)
+                                        .build();
+
+                                    ui.text_colored(
+                                        rgba(150, 150, 160, 255),
+                                        "Use \"0\" to unlock the framerate completely. Press Enter to apply.",
+                                    );
+
+                                    if value < 0 {
+                                        ui.text_colored(
+                                            rgba(255, 82, 82, 255),
+                                            "Please input a positive number.",
+                                        );
+                                    } else if submitted {
+                                        let new_value = if value == 0 {
+                                            -1
+                                        } else {
+                                            value
+                                        };
+
+                                        if new_value != config.fps.target_max_fps {
+                                            config.fps.target_max_fps = new_value;
+                                            should_update_fps = true;
+                                        }
+                                    }
+                                } else {
+                                    ui.text_colored(
+                                        rgba(255, 82, 82, 255),
+                                        "Patch is outdated."
+                                    )
+                                }
+                            }
                         } else {
                             ui.text_colored(
                                 rgba(255, 82, 82, 255),
                                 "Couldn't open a RwLock to CONFIG!",
                             );
+                        }
+
+                        if should_update_fps {
+                            update_frame_rate(should_reset);
                         }
 
                         ui.spacing();

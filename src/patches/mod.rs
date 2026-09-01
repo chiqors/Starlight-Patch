@@ -4,6 +4,7 @@ use crate::hookmgr::HookMgr;
 pub mod redirect;
 pub mod encryption;
 pub mod hypass;
+pub mod fps;
 
 #[derive(Default)]
 pub struct PatchManager {

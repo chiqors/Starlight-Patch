@@ -19,6 +19,7 @@ use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
 use crate::misc::is_wine;
 use crate::patches::{Patch, PatchManager};
 use crate::patches::encryption::Encryption;
+use crate::patches::fps::Fps;
 use crate::patches::hypass::HYPass;
 use crate::patches::redirect::Redirect;
 
@@ -54,6 +55,7 @@ unsafe fn main() {
     PATCH_MANAGER.write().unwrap().run(Patch::<Redirect>::new());
     PATCH_MANAGER.write().unwrap().run(Patch::<Encryption>::new());
     PATCH_MANAGER.write().unwrap().run(Patch::<HYPass>::new());
+    PATCH_MANAGER.write().unwrap().run(Patch::<Fps>::new());
 }
 
 #[allow(non_snake_case)]
